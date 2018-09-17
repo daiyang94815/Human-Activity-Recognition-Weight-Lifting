@@ -15,4 +15,4 @@ The data for this project come from this source: http://groupware.les.inf.puc-ri
 ## What's in my report
 The goal of my project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. My report described how I built my model, how I used cross validation, what I think the expected out of sample error is, and why I made the choices you did. I will also use my prediction model to predict 20 different test cases. 
 
-HTML version of my report can be viewed [here](https://cdn.rawgit.com/daiyang94815/Human-Activity-Recognition-Weight-Lifting/6ecc6fbc/Human%20Activity%20Recognition%20-%20Weight%20Lifting.html).
+HTML version of my report can be viewed [here](https://cdn.rawgit.com/daiyang94815/Human-Activity-Recognition-Weight-Lifting/c2b348d0/Human%20Activity%20Recognition%20-%20Weight%20Lifting.html).
