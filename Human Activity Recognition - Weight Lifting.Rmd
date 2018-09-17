@@ -1,0 +1,82 @@
+---
+title: "Human Activity Recognition - Weight Lifting"
+author: "Yang Dai"
+date: "September 16, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+This dataset comes from Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://web.archive.org/web/20161217164008/http://groupware.les.inf.puc-rio.br:80/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. 
+
+## Prepare the data
+```{r message=FALSE}
+if (!file.exists('training.csv')) download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv","training.csv",mode="wb")
+if (!file.exists('testing.csv')) download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv","testing.csv",mode="wb")
+```
+
+```{r message=FALSE, warning=FALSE}
+library(readr)
+training <- read_csv("training.csv")
+testing <- read_csv("testing.csv")
+```
+
+## Explanatory data analysis
+Take a look of the varibles we have.
+```{r}
+head(colnames(training),20)
+```
+```{r}
+tail(colnames(training),5)
+```
+"classe" varible was coded as character, I transformed it into factor.
+```{r}
+str(training$classe)
+training$classe <- factor(training$classe)
+```
+Take a look at how many activity type we have.
+```{r}
+table(training$classe)
+```
+According to the paper, "participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in ﬁve diﬀerent fashions: exactly according to the speciﬁcation (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). Class A corresponds to the speciﬁed execution of the exercise, while the other 4 classes correspond to common mistakes". 
+
+## Model building
+### Feature selection
+I tried to replicate the model building process the original researchers did, they "used the feature selection algorithm based on correlation proposed by [Hall](https://www.cs.waikato.ac.nz/~mhall/thesis.pdf). The algorithm was conﬁgured to use a "Best First" strategy based on backtracking."  
+  
+(However, I couldn't replicate the result of this feature selection, on both the modified dataset provided by this specialization and original dataset.)  
+  
+I used `cfs()` from `{FSelector}`, which I believe should perform correlation-based feature selection. Selected features (model) is shown below.
+```{r}
+library(FSelector)
+subset <- cfs(classe ~ ., training[,-(1:7)])
+(f <- as.simple.formula(subset, "classe"))
+```
+
+### Train the model with Random Forest
+Again, I choose random forest because it's generally a good training model for classification and it was also used by the researchers: "Because of the characteristic noise in the sensor data, we used a Random Forest approach."  
+  
+I also performed 10-fold cross validation to improve the model. I also set the number of trees to be 50.
+```{r message=FALSE}
+library(caret)
+```
+
+```{r}
+modFit1 <- train(f, data = training, 
+                 method = "rf",
+                 ntree = 50, 
+                 trControl = trainControl(method = "cv")
+                 )
+modFit1
+```
+Since I performed cross validation, the in-sample error rate could be a good estimate of the out-of-sample error rate, and the result shows that the error rate is very low (`r 1-confusionMatrix(predict(modFit1, newdata = training), training$classe)$overall[1]`).
+```{r}
+confusionMatrix(predict(modFit1, newdata = training), training$classe)
+```
+Finally, I used this model to predict on test set.
+```{r}
+predict(modFit1, newdata = testing)
+```
