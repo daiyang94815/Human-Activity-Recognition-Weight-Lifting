@@ -172,13 +172,16 @@ testing &lt;- read_csv(&quot;testing.csv&quot;)</code></pre>
 <h3>Feature selection</h3>
 <p>I tried to replicate the model building process the original researchers did, they “used the feature selection algorithm based on correlation proposed by <a href="https://www.cs.waikato.ac.nz/~mhall/thesis.pdf">Hall</a>. The algorithm was conﬁgured to use a”Best First&quot; strategy based on backtracking.&quot;</p>
 <p>(However, I couldn’t replicate the result of this feature selection, on both the modified dataset provided by this specialization and original dataset.)</p>
+<pre class="r"><code>library(doParallel)                  # doParallel lets use a bunch cores, which speeds things up
+cl &lt;- makePSOCKcluster(7)            
+registerDoParallel(cl)               # this starts things off</code></pre>
 <p>I used <code>cfs()</code> from <code>{FSelector}</code>, which I believe should perform correlation-based feature selection. Selected features (model) is shown below.</p>
 <pre class="r"><code>library(FSelector)
 subset &lt;- cfs(classe ~ ., training[,-(1:7)])
 (f &lt;- as.simple.formula(subset, &quot;classe&quot;))</code></pre>
 <pre><code>## classe ~ roll_belt + pitch_belt + yaw_belt + magnet_arm_x + gyros_dumbbell_y + 
 ##     magnet_dumbbell_y + pitch_forearm
-## &lt;environment: 0x000000001d925608&gt;</code></pre>
+## &lt;environment: 0x000000001dd81120&gt;</code></pre>
 </div>
 <div id="train-the-model-with-random-forest" class="section level3">
 <h3>Train the model with Random Forest</h3>
@@ -199,49 +202,17 @@ modFit1</code></pre>
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 17659, 17662, 17661, 17660, 17659, 17659, ... 
+## Summary of sample sizes: 17661, 17659, 17658, 17660, 17660, 17659, ... 
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa    
-##   2     0.9868524  0.9833728
-##   4     0.9857310  0.9819542
-##   7     0.9779335  0.9720944
+##   2     0.9862910  0.9826635
+##   4     0.9849660  0.9809862
+##   7     0.9778309  0.9719587
 ## 
 ## Accuracy was used to select the optimal model using the largest value.
 ## The final value used for the model was mtry = 2.</code></pre>
-<p>Since I performed cross validation, the in-sample error rate could be a good estimate of the out-of-sample error rate, and the result shows that the error rate is very low (0).</p>
-<pre class="r"><code>confusionMatrix(predict(modFit1, newdata = training), training$classe)</code></pre>
-<pre><code>## Confusion Matrix and Statistics
-## 
-##           Reference
-## Prediction    A    B    C    D    E
-##          A 5580    0    0    0    0
-##          B    0 3797    0    0    0
-##          C    0    0 3422    0    0
-##          D    0    0    0 3216    0
-##          E    0    0    0    0 3607
-## 
-## Overall Statistics
-##                                      
-##                Accuracy : 1          
-##                  95% CI : (0.9998, 1)
-##     No Information Rate : 0.2844     
-##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
-##                                      
-##                   Kappa : 1          
-##  Mcnemar's Test P-Value : NA         
-## 
-## Statistics by Class:
-## 
-##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            1.0000   1.0000   1.0000   1.0000   1.0000
-## Specificity            1.0000   1.0000   1.0000   1.0000   1.0000
-## Pos Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
-## Neg Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
-## Prevalence             0.2844   0.1935   0.1744   0.1639   0.1838
-## Detection Rate         0.2844   0.1935   0.1744   0.1639   0.1838
-## Detection Prevalence   0.2844   0.1935   0.1744   0.1639   0.1838
-## Balanced Accuracy      1.0000   1.0000   1.0000   1.0000   1.0000</code></pre>
+<p>Since I performed cross validation, the out-of-bag error rate could be a good estimate of the out-of-sample error rate, and the result shows that the error rate (1-Accuracy) is very low (0.013709).</p>
 <p>Finally, I used this model to predict on test set.</p>
 <pre class="r"><code>predict(modFit1, newdata = testing)</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B

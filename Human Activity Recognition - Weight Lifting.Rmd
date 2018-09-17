@@ -49,6 +49,11 @@ I tried to replicate the model building process the original researchers did, th
   
 (However, I couldn't replicate the result of this feature selection, on both the modified dataset provided by this specialization and original dataset.)  
   
+```{r message=FALSE}
+library(doParallel)                  # doParallel lets use a bunch cores, which speeds things up
+cl <- makePSOCKcluster(7)            
+registerDoParallel(cl)               # this starts things off
+```
 I used `cfs()` from `{FSelector}`, which I believe should perform correlation-based feature selection. Selected features (model) is shown below.
 ```{r}
 library(FSelector)
@@ -72,10 +77,8 @@ modFit1 <- train(f, data = training,
                  )
 modFit1
 ```
-Since I performed cross validation, the in-sample error rate could be a good estimate of the out-of-sample error rate, and the result shows that the error rate is very low (`r 1-confusionMatrix(predict(modFit1, newdata = training), training$classe)$overall[1]`).
-```{r}
-confusionMatrix(predict(modFit1, newdata = training), training$classe)
-```
+Since I performed cross validation, the out-of-bag error rate could be a good estimate of the out-of-sample error rate, and the result shows that the error rate (1-Accuracy) is very low (`r 1-modFit1$result[1,2]`).
+
 Finally, I used this model to predict on test set.
 ```{r}
 predict(modFit1, newdata = testing)
