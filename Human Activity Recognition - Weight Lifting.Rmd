@@ -83,3 +83,8 @@ Finally, I used this model to predict on test set.
 ```{r}
 predict(modFit1, newdata = testing)
 ```
+
+```{r}
+stopCluster(cl)
+```
+

@@ -164,13 +164,13 @@ testing &lt;- read_csv(&quot;testing.csv&quot;)</code></pre>
 <pre><code>## 
 ##    A    B    C    D    E 
 ## 5580 3797 3422 3216 3607</code></pre>
-<p>According to the paper, “participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in ﬁve diﬀerent fashions: exactly according to the speciﬁcation (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). Class A corresponds to the speciﬁed execution of the exercise, while the other 4 classes correspond to common mistakes”.</p>
+<p>According to the paper, “participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in ï¬ve diï¬erent fashions: exactly according to the speciï¬cation (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E). Class A corresponds to the speciï¬ed execution of the exercise, while the other 4 classes correspond to common mistakes”.</p>
 </div>
 <div id="model-building" class="section level2">
 <h2>Model building</h2>
 <div id="feature-selection" class="section level3">
 <h3>Feature selection</h3>
-<p>I tried to replicate the model building process the original researchers did, they “used the feature selection algorithm based on correlation proposed by <a href="https://www.cs.waikato.ac.nz/~mhall/thesis.pdf">Hall</a>. The algorithm was conﬁgured to use a”Best First&quot; strategy based on backtracking.&quot;</p>
+<p>I tried to replicate the model building process the original researchers did, they “used the feature selection algorithm based on correlation proposed by <a href="https://www.cs.waikato.ac.nz/~mhall/thesis.pdf">Hall</a>. The algorithm was conï¬gured to use a”Best First&quot; strategy based on backtracking.&quot;</p>
 <p>(However, I couldn’t replicate the result of this feature selection, on both the modified dataset provided by this specialization and original dataset.)</p>
 <pre class="r"><code>library(doParallel)                  # doParallel lets use a bunch cores, which speeds things up
 cl &lt;- makePSOCKcluster(7)            
@@ -181,7 +181,7 @@ subset &lt;- cfs(classe ~ ., training[,-(1:7)])
 (f &lt;- as.simple.formula(subset, &quot;classe&quot;))</code></pre>
 <pre><code>## classe ~ roll_belt + pitch_belt + yaw_belt + magnet_arm_x + gyros_dumbbell_y + 
 ##     magnet_dumbbell_y + pitch_forearm
-## &lt;environment: 0x000000001dd81120&gt;</code></pre>
+## &lt;environment: 0x000000001ee116f0&gt;</code></pre>
 </div>
 <div id="train-the-model-with-random-forest" class="section level3">
 <h3>Train the model with Random Forest</h3>
@@ -202,21 +202,22 @@ modFit1</code></pre>
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 17661, 17659, 17658, 17660, 17660, 17659, ... 
+## Summary of sample sizes: 17659, 17660, 17659, 17662, 17660, 17660, ... 
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa    
-##   2     0.9862910  0.9826635
-##   4     0.9849660  0.9809862
-##   7     0.9778309  0.9719587
+##   2     0.9860358  0.9823404
+##   4     0.9853736  0.9815020
+##   7     0.9780858  0.9722815
 ## 
 ## Accuracy was used to select the optimal model using the largest value.
 ## The final value used for the model was mtry = 2.</code></pre>
-<p>Since I performed cross validation, the out-of-bag error rate could be a good estimate of the out-of-sample error rate, and the result shows that the error rate (1-Accuracy) is very low (0.013709).</p>
+<p>Since I performed cross validation, the out-of-bag error rate could be a good estimate of the out-of-sample error rate, and the result shows that the error rate (1-Accuracy) is very low (0.0139642).</p>
 <p>Finally, I used this model to predict on test set.</p>
 <pre class="r"><code>predict(modFit1, newdata = testing)</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>
+<pre class="r"><code>stopCluster(cl)</code></pre>
 </div>
 </div>
 
